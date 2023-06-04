@@ -1,0 +1,39 @@
+service: cloud-checker
+frameworkVersion: '3'
+
+provider:
+  iam:
+    role:
+      managedPolicies:
+        - 'arn:aws:iam::aws:policy/ReadOnlyAccess'
+  name: aws
+  runtime: python3.9
+  # profile: "" # set your aws profile
+  region: "${self:custom.region}"
+  tags:
+    environment: "${self:custom.deploymentStage}"
+    application: cloud-checker
+
+custom:
+  region: ${opt:region, 'us-east-1'}
+  deploymentStage: ${opt:stage, 'prod'}
+  pythonRequirements:
+    pythonBin: python3
+
+functions:
+  cloud-checker:
+    name: "${self:custom.deploymentStage}-cloud-checker"
+    handler: "cloudChecker.handler"
+    memorySize: 128
+    timeout: 600
+    iamRoleStatementsName: cloud-checker
+    iamRoleStatements:
+      - Effect: "Allow"
+        Action:
+          - dynamodb:*
+        Resource: "arn:aws:dynamodb:us-east-1:846254150282:table/ecp-millennium.orders"
+    package:
+      patterns:
+        - './cloudChecker.py'
+    events:
+      - schedule: cron(0 8 1 * ? *)

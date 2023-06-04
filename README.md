@@ -1,2 +1,2 @@
 # cloud-checker
-Cloud Checker is a cloud preventive tool to check for services updates
+Cloud Checker is a cloud prevention tool to check for services available updates
